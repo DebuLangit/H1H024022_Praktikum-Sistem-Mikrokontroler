@@ -1,3 +1,21 @@
+## 📷 Dokumentasi
+
+### 🔌 Rangkaian
+<p align="center">
+  <img src="gambar/rangkaian.jpg" width="400"/>
+</p>
+
+### 💡 Hasil
+<p align="center">
+  <img src="gambar/hasil.jpg" width="400"/>
+</p>
+
+---
+
+## 🎥 Video Uji Coba
+
+[![Uji coba LED Perulangan]([https://drive.google.com/file/d/1ouvm-LdcuhYvykQytWINMKDzTFAIivrL/view?usp=sharing](https://drive.google.com/file/d/1ouvm-LdcuhYvykQytWINMKDzTFAIivrL/view?usp=drive_link))
+
 # 📘 Pertanyaan Praktikum
 
 ## 1. Gambarkan rangkaian schematic 5 LED running!
