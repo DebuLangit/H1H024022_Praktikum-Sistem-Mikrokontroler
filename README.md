@@ -5,10 +5,12 @@ Repository ini digunakan untuk **mengumpulkan dan mendokumentasikan hasil prakti
 ---
 
 ## 👤 Identitas Mahasiswa
-- **Nama**   : Dedi Kurniawan  
-- **NIM**    : H1H024022  
-- **Kelas**  : (Isi sesuai kelas)  
-- **Dosen Pengampu** : (Isi nama dosen)  
+- **Nama**           : Dedi Kurniawan  
+- **NIM**            : H1H024022
+- **Shift Awal**     : A    
+- **Shift Akhir**    : C
+- **Asprak**         : Athallah Tsany Satriyaji & Muhammad Nur Bijak B.
+- **Dosen Pengampu** : Ucky Pradestha N, M.Kom 
 
 ---
 
