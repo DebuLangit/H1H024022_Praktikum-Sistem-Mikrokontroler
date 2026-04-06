@@ -9,7 +9,7 @@ Repository ini digunakan untuk **mengumpulkan dan mendokumentasikan hasil prakti
 - **NIM**            : H1H024022
 - **Shift Awal**     : A    
 - **Shift Akhir**    : C
-- **Asprak**         : Muhammad Nur Bijak Bestari & Athallah Tsany Satriyaji 
+- **Asprak**         : Muhammad Nur Bijak Bestari
 - **Dosen Pengampu** : Ucky Pradestha N, M.Kom 
 
 ---
