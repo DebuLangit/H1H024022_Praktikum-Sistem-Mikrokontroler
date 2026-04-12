@@ -98,6 +98,8 @@ void loop()
   }
 }
 ```
+---
+
 # PERCOBAAN 2B: KONTROL COUNTER DENGAN PUSH BUTTON
 
 ## 1. Rangkaian Schematic
@@ -133,9 +135,93 @@ Jika hanya satu segmen yang mati sementara yang lain normal, masalahnya bersifat
   - Kesalahan Pin Mapping: Urutan pin pada segmentPins tertukar atau ditulis ke pin yang tidak terhubung dengan benar.
   - Lupa di-pinMode: Jika menggunakan modifikasi kode lain yang mendefinisikan pin satu per satu (bukan looping), bisa jadi pin tersebut terlewat diset sebagai OUTPUT.
 
+## 4. Modifikasi rangkaian dan program dengan dua push button yang berfungsi sebagai penambahan (increment) dan pengurangan (decrement) pada sistem counter dan berikan penjelasan disetiap baris kode nya
 
+Modifikasi Rangkaian:
+Karena kita butuh dua tombol dan masih ingin menggunakan fitur Interrupt (yang sangat responsif), kita akan menggunakan pin 2 dan pin 3. Pada Arduino Uno, hanya pin 2 dan 3 yang mendukung External Interrupt.
+- Tombol 1 (Increment) dihubungkan ke Pin 2 dan GND.
+- Tombol 2 (Decrement) dihubungkan ke Pin 3 dan GND.
 
+```cpp
+// Pin mapping segment: a b c d e f g dp
+const int segmentPins[8] = {7, 6, 5, 11, 10, 8, 9, 4};
+const int btnUp = 2;   // Interrupt pin 0 untuk tombol Increment
+const int btnDown = 3; // Interrupt pin 1 untuk tombol Decrement
 
+volatile int currentDigit = 0;      // Digit saat ini (volatile karena diakses oleh ISR)
+volatile bool upPressed = false;    // Flag untuk tombol Increment
+volatile bool downPressed = false;  // Flag untuk tombol Decrement
 
+// Pola nyala segmen (1 = Aktif, akan dibalik jadi LOW nanti)
+byte digitPattern[16][8] = {
+  {1,1,1,1,1,1,0,0}, // 0
+  {0,1,1,0,0,0,0,0}, // 1
+  {1,1,0,1,1,0,1,0}, // 2
+  {1,1,1,1,0,0,1,0}, // 3 
+  {0,1,1,0,0,1,1,0}, // 4
+  {1,0,1,1,0,1,1,0}, // 5
+  {1,0,1,1,1,1,1,0}, // 6
+  {1,1,1,0,0,0,0,0}, // 7
+  {1,1,1,1,1,1,1,0}, // 8
+  {1,1,1,1,0,1,1,0}, // 9
+  {1,1,1,0,1,1,1,0}, // A
+  {0,0,1,1,1,1,1,0}, // b
+  {1,0,0,1,1,1,0,0}, // C
+  {0,1,1,1,1,0,1,0}, // d
+  {1,0,0,1,1,1,1,0}, // E
+  {1,0,0,0,1,1,1,0}  // F
+};
 
+// Fungsi untuk menampilkan digit (dibalik dengan '!' untuk Common Anode)
+void displayDigit(int num) {
+  for(int i=0; i<8; i++) {
+    digitalWrite(segmentPins[i], !digitPattern[num][i]); 
+  }
+}
+
+// Interrupt Service Routine (ISR) untuk tombol naik
+void btnUpISR() {
+  upPressed = true;
+}
+
+// Interrupt Service Routine (ISR) untuk tombol turun
+void btnDownISR() {
+  downPressed = true;
+}
+
+void setup() {
+  for(int i=0; i<8; i++) {
+    pinMode(segmentPins[i], OUTPUT);
+  }
+  
+  pinMode(btnUp, INPUT_PULLUP);    // Tombol naik menggunakan pull-up internal
+  pinMode(btnDown, INPUT_PULLUP);  // Tombol turun menggunakan pull-up internal
+  
+  // Mengaitkan pin dengan fungsi ISR, dipicu saat sinyal FALLING (HIGH ke LOW)
+  attachInterrupt(digitalPinToInterrupt(btnUp), btnUpISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(btnDown), btnDownISR, FALLING);
+}
+
+void loop() {
+  // Mengecek apakah tombol Increment ditekan
+  if(upPressed) {
+    currentDigit = (currentDigit + 1) % 16; // Ditambah 1. Jika 15+1 akan kembali ke 0
+    upPressed = false; // Reset flag
+    delay(200);        // Debouncing sederhana agar tidak terjadi multiple trigger
+  }
+  
+  // Mengecek apakah tombol Decrement ditekan
+  if(downPressed) {
+    currentDigit = (currentDigit - 1); // Dikurangi 1
+    if(currentDigit < 0) {
+      currentDigit = 15; // Jika kurang dari 0, putar kembali ke F (15)
+    }
+    downPressed = false; // Reset flag
+    delay(200);          // Debouncing sederhana
+  }
+  
+  // Menampilkan digit saat ini di 7-segment secara terus menerus
+  displayDigit(currentDigit);
+}
+```
 
