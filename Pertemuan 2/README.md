@@ -99,3 +99,43 @@ void loop()
 }
 ```
 # PERCOBAAN 2B: KONTROL COUNTER DENGAN PUSH BUTTON
+
+## 1. Rangkaian Schematic
+Gambarkan rangkaian schematic yang digunakan pada percobaan:
+
+<p align="center">
+  <img width="673" height="345" alt="image" src="https://github.com/user-attachments/assets/737b9897-e80f-4e65-9c2c-b2f2cb39753d" />
+</p>
+
+---
+
+## 2. Mengapa pada push button digunakan mode INPUT_PULLUP pada Arduino Uno? Apa keuntungannya dibandingkan rangkaian biasa?
+Mode INPUT_PULLUP digunakan untuk mengaktifkan resistor pull-up internal yang ada di dalam mikrokontroler Arduino.
+- Saat tombol tidak ditekan, pin akan membaca nilai HIGH (1).
+- Saat tombol ditekan (dihubungkan ke GND), pin akan membaca nilai LOW (0).
+Ini mencegah pin dalam kondisi floating (mengambang/tidak menentu) yang bisa menangkap noise elektromagnetik dan menyebabkan pembacaan acak.
+
+Keuntungannya:
+- Keuntungan utamanya adalah menghemat komponen hardware. Kamu tidak perlu repot-repot menambahkan resistor pull-up atau pull-down eksternal di breadboard.
+- Rangkaian menjadi jauh lebih sederhana karena tombol hanya perlu dihubungkan langsung antara pin digital Arduino dan pin GND (Ground).
+
+---
+
+## 3. Jika salah satu LED segmen tidak menyala, apa saja kemungkinan penyebabnya dari sisi hardware maupun software?
+Jika hanya satu segmen yang mati sementara yang lain normal, masalahnya bersifat spesifik pada jalur segmen tersebut.
+- Dari sisi Hardware:
+  - LED Segmen Putus/Terbakar: Dioda LED di dalam komponen 7-segment untuk segmen tersebut sudah rusak.
+  - Kabel Jumper Kendur/Putus: Kabel yang menghubungkan pin Arduino ke pin segmen tersebut tidak menancap dengan baik di breadboard atau putus di dalam.
+  - Resistor Rusak: Jika kamu menggunakan resistor pembatas arus pada masing-masing pin segmen, resistor untuk jalur tersebut mungkin rusak atau tidak terhubung sempurna.
+  - Pin Arduino Rusak: Pin digital pada Arduino yang ditugaskan untuk segmen tersebut (misal pin 7 untuk segmen 'a') mengalami kerusakan internal.
+- Dari sisi Software:
+  - Kesalahan Deklarasi Array digitPattern: Terdapat kesalahan pengetikan pola bit (angka 0 atau 1) pada matriks digitPattern. Misalnya, segmen yang seharusnya menyala (angka 1) malah tertulis mati (angka 0).
+  - Kesalahan Pin Mapping: Urutan pin pada segmentPins tertukar atau ditulis ke pin yang tidak terhubung dengan benar.
+  - Lupa di-pinMode: Jika menggunakan modifikasi kode lain yang mendefinisikan pin satu per satu (bukan looping), bisa jadi pin tersebut terlewat diset sebagai OUTPUT.
+
+
+
+
+
+
+
