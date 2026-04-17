@@ -1,15 +1,35 @@
-# PERCOBAAN 2A: SEVEN SEGMENT 
+# Percobaan 3A: Komunikasi Serial (UART)
 
-## 1. Rangkaian Schematic
-Gambarkan rangkaian schematic yang digunakan pada percobaan:
-
-<p align="center">
-  <img width="704" alt="Schematic Seven Segment" src="https://github.com/user-attachments/assets/0a2f618c-bc1c-4227-8d56-fb49938a7539" />
-</p>
-
+## 1. Jelaskan proses dari input keyboard hingga LED menyala/mati!
+**Keyboard → UART → Arduino → Logika Program → LED**
+- User mengetik input di Serial Monitor
+- Data dikirim melalui komunikasi UART (USB)
+- Arduino menerima data
+  Data masuk ke buffer serial dan dicek menggunakan:
+  ```cpp
+  Serial.available()
+  ```
+- Arduino membaca data
+  ```cpp
+  Serial.available()char data = Serial.read();
+  ```
+- Program melakukan percabangan
+  ```cpp
+  if (data == '1')
+  ```
+  - Jika '1' → LED menyala
+  - Jika '0' → LED mati
+- Arduino mengontrol pin digital
+  ```cpp
+  digitalWrite(PIN_LED, HIGH); // nyala
+  digitalWrite(PIN_LED, LOW);  // mati
+  ```
+- LED merespon
+  - HIGH → LED ON
+  - LOW → LED OFF
 ---
 
-## 2. Apa yang terjadi jika nilai `num` lebih dari 15?
+## 2. Mengapa digunakan Serial.available() sebelum membaca data? Apa yang terjadi jika baris tersebut dihilangkan?
 
 Jika nilai `num` pada fungsi `displayDigit(num)` lebih dari 15 (misalnya 16, 17, dst.), maka akan terjadi **array out of bounds**.
 
@@ -21,7 +41,8 @@ Jika nilai `num` pada fungsi `displayDigit(num)` lebih dari 15 (misalnya 16, 17,
 
 ---
 
-## 3. Jenis Seven Segment yang digunakan
+## 3. Modifikasi program agar LED berkedip (blink) ketika menerima input '2' dengan kondisi jika ‘2’ aktif maka LED akan terus berkedip sampai perintah selanjutnya diberikan dan berikan penjelasan disetiap baris kode nya dalam bentuk README.md!
+
 
 Program ini menggunakan **Common Anode**.
 
@@ -32,7 +53,7 @@ Program ini menggunakan **Common Anode**.
 
 ---
 
-## 4.  Modifikasi program agar tampilan berjalan dari F ke 0 dan penjelasan disetiap baris kode
+## 4.  Tentukan apakah menggunakan delay() atau milis()! Jelaskan pengaruhnya terhadap sistem
    
 ```cpp
 // 7-Segment Common Anode
