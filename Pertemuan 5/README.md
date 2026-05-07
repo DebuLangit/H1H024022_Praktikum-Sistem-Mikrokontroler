@@ -1,7 +1,7 @@
 # <p align="center">Dokumentasi Praktikum</p>
-## Percobaan 1: Analog to Digital Converter (ADC)
+## Percobaan 5A: Multitasking
 https://github.com/user-attachments/assets/b6be53a1-9c7e-46c8-985d-65e5a6afcd52
-## Percobaan 2: Pulse Width Modulation (PWM)
+## Percobaan 5B: Komunikasi Task
 https://github.com/user-attachments/assets/d1e65904-4c0b-4634-9a74-8413c75f2ce2
 
 ---
