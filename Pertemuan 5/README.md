@@ -38,3 +38,10 @@ https://github.com/user-attachments/assets/9f792b8f-9c9b-4bb9-adce-95ebb525d9a3
 ---
 
 ## B. Percobaan 5B: Komunikasi Task
+
+
+1. Apakah kedua task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
+
+3. Apakah program ini berpotensi mengalami race condition? Jelaskan!
+
+4. Modifikasilah program dengan menggunakan sensor DHT sesungguhnya sehingga informasi yang ditampilkan dinamis. Bagaimana hasilnya? Jelaskan program pada file README.md.
