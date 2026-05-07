@@ -10,6 +10,12 @@ https://github.com/user-attachments/assets/9f792b8f-9c9b-4bb9-adce-95ebb525d9a3
 
 ## A. Percobaan 5A: Multitasking
 
+1. Apakah ketiga task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
+
+2. Bagaimana cara menambahkan task keempat? Jelaskan langkahnya!
+
+3. Modifikasilah program dengan menambah sensor (misalnya potensiometer), lalu gunakan nilainya untuk mengontrol kecepatan LED! Bagaimana hasilnya? Jelaskan program pada file README.md.
+
 1. Apa fungsi perintah `analogRead()` pada rangkaian praktikum ini?
 
    Jawab:
