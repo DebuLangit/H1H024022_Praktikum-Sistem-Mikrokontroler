@@ -1,14 +1,14 @@
 # <p align="center">Dokumentasi Praktikum</p>
 ## Percobaan 5A: Multitasking
-https://github.com/user-attachments/assets/b6be53a1-9c7e-46c8-985d-65e5a6afcd52
+https://github.com/user-attachments/assets/9f792b8f-9c9b-4bb9-adce-95ebb525d9a3
 ## Percobaan 5B: Komunikasi Task
-https://github.com/user-attachments/assets/d1e65904-4c0b-4634-9a74-8413c75f2ce2
+(isi link video)
 
 ---
 
 # <p align="center">Menjawab Pertanyaan Praktikum</p>
 
-## A. Percobaan 1: Analog to Digital Converter (ADC)
+## A. Percobaan 5A: Multitasking
 
 1. Apa fungsi perintah `analogRead()` pada rangkaian praktikum ini?
 
@@ -31,4 +31,4 @@ https://github.com/user-attachments/assets/d1e65904-4c0b-4634-9a74-8413c75f2ce2
 
 ---
 
-## B. Percobaan 2: Pulse Width Modulation (PWM)
+## B. Percobaan 5B: Komunikasi Task
