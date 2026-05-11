@@ -51,6 +51,94 @@ https://github.com/user-attachments/assets/9f792b8f-9c9b-4bb9-adce-95ebb525d9a3
    dibaca oleh Arduino (melalui pin ADC) dan dikonversi menjadi rentang waktu. Waktu tersebut kemudian diumpankan ke dalam fungsi `vTaskDelay()` untuk
    mengontrol seberapa cepat sebuah LED berkedip secara dinamis, tanpa menghentikan eksekusi task lainnya.
 
+   ```cpp
+   #include <Arduino_FreeRTOS.h>
+
+   void TaskBlink1( void *pvParameters );
+   void TaskBlink2( void *pvParameters );
+   void Taskprint( void *pvParameters );
+
+   void setup() {
+     // initialize serial communication at 9600 bits per second:
+     Serial.begin(9600);
+  
+     xTaskCreate(
+       TaskBlink1
+       , "task1"
+       , 128
+       , NULL
+       , 1
+       , NULL );
+    
+     xTaskCreate(
+       TaskBlink2
+       , "task2"
+       , 128
+       , NULL
+       , 1 
+       , NULL );
+    
+     xTaskCreate(
+       Taskprint
+       , "task3"
+       , 128
+       , NULL
+       , 1
+       , NULL );
+    
+     vTaskStartScheduler();
+   }
+
+   void loop()
+   {
+   }
+
+   void TaskBlink1(void *pvParameters) {
+     pinMode(8, OUTPUT);
+     while(1)
+     {
+       Serial.println("Task1");
+    
+       // 1. Membaca nilai dari Potensiometer di pin A0 (0 - 1023)
+       int potValue = analogRead(A0);
+    
+       // 2. Memetakan nilai ADC menjadi delay waktu (misal: rentang 50 ms hingga 1000 ms)
+       int dynamicDelay = map(potValue, 0, 1023, 50, 1000);
+    
+       digitalWrite(8, HIGH);
+       // 3. Mengganti nilai statis 200 dengan dynamicDelay
+       vTaskDelay( dynamicDelay / portTICK_PERIOD_MS ); 
+    
+       digitalWrite(8, LOW);
+       vTaskDelay( dynamicDelay / portTICK_PERIOD_MS );
+     }
+   }
+
+   void TaskBlink2(void *pvParameters)
+   {
+     pinMode(7, OUTPUT);
+     while(1)
+     {
+       Serial.println("Task2");
+       digitalWrite(7, HIGH);
+       vTaskDelay( 300 / portTICK_PERIOD_MS );
+       digitalWrite(7, LOW);
+       vTaskDelay( 300 / portTICK_PERIOD_MS );
+     }
+   }
+
+   void Taskprint(void *pvParameters) {
+     int counter = 0;
+     while(1)
+     {
+       counter++;
+       Serial.print("Counter: "); // Ditambahkan teks agar lebih rapi di Serial Monitor
+       Serial.println(counter);
+       vTaskDelay(500 / portTICK_PERIOD_MS); 
+     }
+   }
+   ```
+
    ## Hasil Pengamatan Modifikasi Percobaan 5A
 
    | Kondisi Potensiometer | Nilai Pembacaan ADC (A0) | Estimasi Jeda (dynamicDelay) | Hasil Pengamatan LED 1 (Pin 8) | Hasil Pengamatan LED 2 (Pin 7) | Output Serial (TaskPrint) |
