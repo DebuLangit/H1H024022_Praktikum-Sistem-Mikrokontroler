@@ -164,6 +164,29 @@ https://github.com/user-attachments/assets/9f792b8f-9c9b-4bb9-adce-95ebb525d9a3
 
 1. Apakah kedua task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
 
-3. Apakah program ini berpotensi mengalami race condition? Jelaskan!
+   Jawab:
+   Secara fisik pada tingkat perangkat keras, kedua task (read_data dan display) berjalan secara bergantian. Arduino Uno menggunakan mikrokontroler single
+   core, sehingga ia hanya dapat memproses satu instruksi pada satu waktu. Namun, pada tingkat perangkat lunak, keduanya terlihat berjalan secara bersamaan
+   (concurrent).
 
-4. Modifikasilah program dengan menggunakan sensor DHT sesungguhnya sehingga informasi yang ditampilkan dinamis. Bagaimana hasilnya? Jelaskan program pada file README.md.
+   Mekanismenya:
+   Hal ini dimungkinkan oleh Kernel Scheduler dari FreeRTOS. Scheduler membagi waktu prosesor dengan sangat cepat (time-slicing) dan melakukan context
+   switching.
+   - Saat task read_data sedang mengemas data dan mengirimkannya ke Queue, task tersebut memegang kendali CPU.
+   - Setelah mengeksekusi vTaskDelay() atau ketika task display sedang menunggu data dengan xQueueReceive (menggunakan parameter portMAX_DELAY), task tersebut
+     masuk ke status Blocked (menunggu).
+   - Pada momen Blocked inilah, Scheduler langsung mengalihkan kendali CPU ke task lain yang statusnya sudah Ready, sehingga keduanya seolah-olah berjalan
+     paralel tanpa saling memblokir.
+
+2. Apakah program ini berpotensi mengalami race condition? Jelaskan!
+
+   Jawab: Tidak, program ini tidak berpotensi mengalami race condition.
+   Race condition terjadi ketika beberapa task mengakses dan mengubah variabel yang sama secara bersamaan sehingga data menjadi tidak valid. Pada Percobaan 5B,
+   masalah ini dicegah dengan penggunaan Queue (xQueueSend dan xQueueReceive) yang bersifat thread-safe. Queue mengatur pertukaran data antara task secara aman
+   sehingga tidak ada akses langsung ke variabel yang sama pada waktu bersamaan.
+   
+3. Modifikasilah program dengan menggunakan sensor DHT sesungguhnya sehingga informasi yang ditampilkan dinamis. Bagaimana hasilnya? Jelaskan program pada file
+   README.md.
+
+   Jawab:
+   
