@@ -12,9 +12,38 @@ https://github.com/user-attachments/assets/9f792b8f-9c9b-4bb9-adce-95ebb525d9a3
 
 1. Apakah ketiga task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
 
+   Jawab:
+   Ketiga task secara fisik berjalan secara bergantian, bukan bersamaan secara absolut. Hal ini karena Arduino Uno menggunakan mikrokontroler dengan prosesor
+   inti tunggal (single-core), sehingga ia hanya bisa mengeksekusi satu instruksi pada satu waktu. Namun, ketiganya terlihat berjalan bersamaan secara kasat
+   mata (seolah-olah paralel).
+
+   RTOS menggunakan Kernel Scheduler untuk mengatur pembagian waktu CPU melalui mekanisme time-slicing. Saat sebuah task menjalankan `vTaskDelay()`, task
+   tersebut berhenti sementara dan memberi kesempatan CPU menjalankan task lain yang siap dieksekusi. Pergantian antar-task (context switching) terjadi sangat
+   cepat sehingga program terlihat berjalan secara bersamaan.
+   
 2. Bagaimana cara menambahkan task keempat? Jelaskan langkahnya!
 
-3. Modifikasilah program dengan menambah sensor (misalnya potensiometer), lalu gunakan nilainya untuk mengontrol kecepatan LED! Bagaimana hasilnya? Jelaskan program pada file README.md.
+    Jawab:
+   - Deklarasi Prototipe Fungsi: Tambahkan nama fungsi baru di bagian atas kode program sebelum `setup().`
+     Contoh: `void TaskBlink3(void *pvParameters);`
+   - Registrasi Task ke Scheduler: Di dalam blok setup(), panggil perintah xTaskCreate() untuk mengalokasikan memori dan mendaftarkan task keempat tersebut
+     sebelum `vTaskStartScheduler()` dipanggil.
+     Contoh: `xTaskCreate(TaskBlink3, "Task4", 128, NULL, 1, NULL);`
+   - Definisi Logika Task: Buat blok fungsi di luar `setup()` dan `loop()` yang memuat logika program. Blok ini wajib memiliki perulangan tak terbatas seperti
+     `while(1)` atau `for(;;)` dan wajib memuat penundaan non-blocking menggunakan `vTaskDelay()` agar task tidak memonopoli (hogging) CPU.
+     Contoh:
+     ```cpp
+     void TaskBlink3(void *pvParameters) {
+        pinMode(6, OUTPUT);
+        while(1) {
+          digitalWrite(6, HIGH);
+          vTaskDelay(400 / portTICK_PERIOD_MS);
+          digitalWrite(6, LOW);
+          vTaskDelay(400 / portTICK_PERIOD_MS);
+        }
+      }
+     ```
+5. Modifikasilah program dengan menambah sensor (misalnya potensiometer), lalu gunakan nilainya untuk mengontrol kecepatan LED! Bagaimana hasilnya? Jelaskan program pada file README.md.
 
 1. Apa fungsi perintah `analogRead()` pada rangkaian praktikum ini?
 
