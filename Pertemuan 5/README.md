@@ -2,7 +2,7 @@
 ## Percobaan 5A: Multitasking
 https://github.com/user-attachments/assets/9f792b8f-9c9b-4bb9-adce-95ebb525d9a3
 ## Percobaan 5B: Komunikasi Task
-(isi link video)
+https://github.com/user-attachments/assets/6f2c161f-e989-40db-b4d1-8a11d74e8846
 
 ---
 
