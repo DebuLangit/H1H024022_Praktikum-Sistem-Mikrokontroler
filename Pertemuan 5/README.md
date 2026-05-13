@@ -12,7 +12,7 @@ https://github.com/user-attachments/assets/6f2c161f-e989-40db-b4d1-8a11d74e8846
 
 1. Apakah ketiga task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
 
-   Jawab:
+   **Jawab:**
    Ketiga task secara fisik berjalan secara bergantian, bukan bersamaan secara absolut. Hal ini karena Arduino Uno menggunakan mikrokontroler dengan prosesor
    inti tunggal (single-core), sehingga ia hanya bisa mengeksekusi satu instruksi pada satu waktu. Namun, ketiganya terlihat berjalan bersamaan secara kasat
    mata (seolah-olah paralel).
@@ -23,7 +23,7 @@ https://github.com/user-attachments/assets/6f2c161f-e989-40db-b4d1-8a11d74e8846
    
 2. Bagaimana cara menambahkan task keempat? Jelaskan langkahnya!
 
-    Jawab:
+   **Jawab:**
    - Deklarasi Prototipe Fungsi: Tambahkan nama fungsi baru di bagian atas kode program sebelum `setup().`
      Contoh: `void TaskBlink3(void *pvParameters);`
    - Registrasi Task ke Scheduler: Di dalam blok setup(), panggil perintah xTaskCreate() untuk mengalokasikan memori dan mendaftarkan task keempat tersebut
@@ -46,7 +46,7 @@ https://github.com/user-attachments/assets/6f2c161f-e989-40db-b4d1-8a11d74e8846
 3. Modifikasilah program dengan menambah sensor (misalnya potensiometer), lalu gunakan nilainya untuk mengontrol kecepatan LED! Bagaimana hasilnya? Jelaskan
    program pada file README.md.
 
-   Jawab:
+   **Jawab:**
    Program ini memodifikasi Percobaan 5A (Multitasking) dengan menambahkan komponen sensor analog berupa **Potensiometer**. Nilai resistansi dari potensiometer
    dibaca oleh Arduino (melalui pin ADC) dan dikonversi menjadi rentang waktu. Waktu tersebut kemudian diumpankan ke dalam fungsi `vTaskDelay()` untuk
    mengontrol seberapa cepat sebuah LED berkedip secara dinamis, tanpa menghentikan eksekusi task lainnya.
@@ -138,23 +138,14 @@ https://github.com/user-attachments/assets/6f2c161f-e989-40db-b4d1-8a11d74e8846
      }
    }
    ```
+   **Analisis Hasil Modifikasi:**
+   Hasil modifikasi menunjukkan bahwa fungsi map berhasil mengubah nilai ADC potensiometer menjadi dynamicDelay 50–1000 ms secara real-time. Perubahan tersebut
+   memengaruhi kecepatan kedip LED 1 sesuai posisi potensiometer.
 
-   ## Hasil Pengamatan Modifikasi Percobaan 5A
+   Setiap task pada RTOS berjalan secara independen sehingga perubahan pada LED 1 tidak memengaruhi LED 2 maupun pengiriman data Serial Monitor. Penggunaan
+   vTaskDelay() memungkinkan sistem bekerja secara non-blocking, karena saat satu task menunggu, CPU dapat menjalankan task lain.
 
-   | Kondisi Potensiometer | Nilai Pembacaan ADC (A0) | Estimasi Jeda (dynamicDelay) | Hasil Pengamatan LED 1 (Pin 8) | Hasil Pengamatan LED 2 (Pin 7) | Output Serial (TaskPrint) |
-   | :--- | :--- | :--- | :--- | :--- | :--- |
-   | **Putar Kiri Penuh (Min)** | 0 | 50 ms | Berkedip sangat cepat | Berkedip stabil (jeda 300ms) | Counter berjalan normal |
-   | **Putar Tengah** | ~512 | ~525 ms | Berkedip dengan kecepatan sedang | Berkedip stabil (jeda 300ms) | Counter berjalan normal |
-   | **Putar Kanan Penuh (Max)** | 1023 | 1000 ms | Berkedip sangat lambat | Berkedip stabil (jeda 300ms) | Counter berjalan normal |
-
-   ## Analisis Hasil Modifikasi
-
-   - **Efektivitas Fungsi Map**: Program berhasil melakukan pemetaan (*mapping*) nilai mentah ADC dari potensiometer (0-1023) menjadi nilai variabel waktu jeda    (*dynamicDelay*) antara 50ms hingga 1000ms secara *real-time*.
-   - **Independensi Task**: Meskipun kecepatan kedip pada LED 1 berubah secara drastis mengikuti putaran potensiometer, durasi kedip pada LED 2 dan kecepatan       pengiriman data *counter* pada Serial Monitor sama sekali tidak terganggu. Hal ini membuktikan bahwa setiap *task* berjalan secara independen dalam alokasi    memorinya sendiri.
-   - **Mekanisme Non-Blocking**: Penggunaan `vTaskDelay()` terbukti sangat efektif. Saat `TaskBlink1` berada dalam kondisi menunggu (*blocked*) karena durasi       *delay* yang panjang (1 detik), *Kernel Scheduler* segera mengalihkan sumber daya CPU untuk mengeksekusi `TaskBlink2` dan `Taskprint`. Inilah alasan
-     mengapa LED 2 tidak ikut melambat meskipun LED 1 sedang dalam jeda waktu yang lama.
-   - **Kesimpulan Analisis**: Implementasi RTOS pada modifikasi ini berhasil menangani input analog yang bersifat dinamis tanpa menimbulkan *blocking* pada          sistem secara keseluruhan, yang merupakan keunggulan utama dibandingkan metode `delay()` konvensional pada Arduino non-OS.
-
+   Dengan demikian, RTOS berhasil menangani proses dinamis secara efisien dibandingkan metode delay() biasa pada Arduino.
 
 
 ---
@@ -164,7 +155,7 @@ https://github.com/user-attachments/assets/6f2c161f-e989-40db-b4d1-8a11d74e8846
 
 1. Apakah kedua task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
 
-   Jawab:
+   **Jawab:**
    Secara fisik pada tingkat perangkat keras, kedua task (read_data dan display) berjalan secara bergantian. Arduino Uno menggunakan mikrokontroler single
    core, sehingga ia hanya dapat memproses satu instruksi pada satu waktu. Namun, pada tingkat perangkat lunak, keduanya terlihat berjalan secara bersamaan
    (concurrent).
@@ -180,7 +171,7 @@ https://github.com/user-attachments/assets/6f2c161f-e989-40db-b4d1-8a11d74e8846
 
 2. Apakah program ini berpotensi mengalami race condition? Jelaskan!
 
-   Jawab: Tidak, program ini tidak berpotensi mengalami race condition.
+   **Jawab:** Tidak, program ini tidak berpotensi mengalami race condition.
    Race condition terjadi ketika beberapa task mengakses dan mengubah variabel yang sama secara bersamaan sehingga data menjadi tidak valid. Pada Percobaan 5B,
    masalah ini dicegah dengan penggunaan Queue (xQueueSend dan xQueueReceive) yang bersifat thread-safe. Queue mengatur pertukaran data antara task secara aman
    sehingga tidak ada akses langsung ke variabel yang sama pada waktu bersamaan.
@@ -188,5 +179,89 @@ https://github.com/user-attachments/assets/6f2c161f-e989-40db-b4d1-8a11d74e8846
 3. Modifikasilah program dengan menggunakan sensor DHT sesungguhnya sehingga informasi yang ditampilkan dinamis. Bagaimana hasilnya? Jelaskan program pada file
    README.md.
 
-   Jawab:
-   
+   **Jawab:**
+   ```cpp
+   #include <Arduino_FreeRTOS.h>
+   #include <queue.h>
+   #include <DHT.h>
+
+   // Konfigurasi pin dan tipe sensor DHT
+   #define DHTPIN 2
+   #define DHTTYPE DHT22
+
+   // Inisialisasi objek DHT
+   DHT dht(DHTPIN, DHTTYPE);
+
+   // Struktur data untuk menyimpan suhu dan kelembapan
+   // Menggunakan float karena DHT22 membaca nilai desimal
+   struct readings {
+     float temp;
+     float h;
+   };
+
+   QueueHandle_t my_queue;
+
+   void setup() {
+     Serial.begin(9600);
+     dht.begin();
+
+     // Membuat antrean (Queue) berkapasitas 1 elemen dengan ukuran struktur 'readings'
+     my_queue = xQueueCreate(1, sizeof(struct readings));
+
+     // Validasi: Cek apakah Queue berhasil dibuat sebelum menjalankan task
+     if (my_queue != NULL) {
+       xTaskCreate(read_data, "Read DHT", 128, NULL, 1, NULL);
+       xTaskCreate(display, "Display", 128, NULL, 1, NULL);
+     } else {
+       Serial.println("Gagal membuat Queue!");
+     }
+   }
+
+   void loop() {
+     // Dikosongkan karena eksekusi diambil alih oleh Scheduler FreeRTOS
+   }
+
+   // Task 1: Membaca Sensor (Produsen)
+   void read_data(void *pvParameters) {
+     struct readings x;
+  
+     for (;;) {
+       // Membaca data kelembapan dan suhu dari sensor
+       x.h = dht.readHumidity();
+       x.temp = dht.readTemperature();
+
+       // Validasi pembacaan sensor (mencegah pengiriman data error)
+       if (isnan(x.h) || isnan(x.temp)) {
+         Serial.println("Gagal membaca dari sensor DHT22!");
+       } else {
+         // Jika berhasil, kirim struktur data ke Queue
+         xQueueSend(my_queue, &x, portMAX_DELAY);
+       }
+    
+       // Spesifikasi hardware DHT22 mewajibkan jeda minimal 2000 ms antar-pembacaan
+       vTaskDelay(2000 / portTICK_PERIOD_MS);
+     }
+   }
+
+   // Task 2: Menampilkan Data (Konsumen)
+   void display(void *pvParameters) {
+     struct readings x;
+  
+     for (;;) {
+       // Menunggu hingga ada data yang masuk ke Queue, lalu mengambilnya
+       if (xQueueReceive(my_queue, &x, portMAX_DELAY) == pdPASS) {
+         Serial.print("Suhu = ");
+         Serial.print(x.temp);
+         Serial.print(" °C  |  Kelembapan = ");
+         Serial.print(x.h);
+         Serial.println(" %");
+       }
+     }
+   }
+   ```
+   | Waktu Eksekusi | Aksi Task `read_data` (Produsen) | Output Task `display` (Konsumen di Serial Monitor) | Status Antrean (Queue) |
+   | :--- | :--- | :--- | :--- |
+   | **0 detik** | Membaca sensor & mengirim data | `Suhu = 28.50 °C | Kelembapan = 65.20 %` | Kosong (Data langsung diambil) |
+   | **2 detik** | Membaca sensor & mengirim data | `Suhu = 28.50 °C | Kelembapan = 65.20 %` | Kosong (Data langsung diambil) |
+   | **4 detik** | Membaca sensor & mengirim data | `Suhu = 28.60 °C | Kelembapan = 65.30 %` | Kosong (Data langsung diambil) |
+   | **Simulasi Error**| Deteksi fungsi `isnan()` | `Gagal membaca dari sensor DHT22!` | Tetap Kosong |
