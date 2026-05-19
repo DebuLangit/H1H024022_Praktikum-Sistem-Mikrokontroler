@@ -11,24 +11,24 @@ https://github.com/user-attachments/assets/66e88dc7-947a-4f9c-a93c-eb9a4faaf1e2
 interrupt!
 
    **Jawab:**
-   Tombol dapat mengubah kondisi LED menggunakan hardware interrupt. Pin 2 diatur sebagai INPUT_PULLUP, sehingga normalnya bernilai HIGH. Saat tombol ditekan, tegangan berubah dari HIGH ke LOW dan memicu mode FALLING. Mikrokontroler kemudian menghentikan sementara fungsi loop() untuk menjalankan ISR tombolInterrupt() yang mengubah nilai ledState. Setelah itu, program kembali ke loop() dan menjalankan digitalWrite(13, ledState) untuk mengubah kondisi LED.
+   Tombol dapat mengubah kondisi LED menggunakan hardware interrupt. Pin 2 diatur sebagai `INPUT_PULLUP`, sehingga normalnya bernilai `HIGH`. Saat tombol ditekan, tegangan berubah dari `HIGH` ke `LOW` dan memicu mode `FALLING`. Mikrokontroler kemudian menghentikan sementara fungsi `loop()` untuk menjalankan ISR `tombolInterrupt()` yang mengubah nilai `ledState`. Setelah itu, program kembali ke `loop()` dan menjalankan `digitalWrite(13, ledState)` untuk mengubah kondisi LED.
    
-2. Apa fungsi attachInterrupt() pada program tersebut?
+2. Apa fungsi `attachInterrupt()` pada program tersebut?
 
    **Jawab:**
-   Fungsi attachInterrupt() digunakan untuk menghubungkan interupsi pada Pin 2 dengan fungsi tombolInterrupt. Saat terjadi perubahan sinyal turun (FALLING), mikrokontroler langsung menjalankan fungsi ISR tersebut.
+   Fungsi `attachInterrupt()` digunakan untuk menghubungkan interupsi pada Pin 2 dengan fungsi tombolInterrupt. Saat terjadi perubahan sinyal turun (`FALLING`), mikrokontroler langsung menjalankan fungsi ISR tersebut.
   
-3. Mengapa pada ISR tidak disarankan menggunakan delay() dan Serial.print()?
+3. Mengapa pada ISR tidak disarankan menggunakan `delay()` dan `erial.print()`?
 
    **Jawab:**
-   ISR harus dibuat sesingkat mungkin karena proses utama program akan berhenti sementara saat ISR berjalan. Fungsi seperti delay() dan Serial.print() sebaiknya tidak digunakan karena bersifat lambat dan blocking, sehingga dapat menyebabkan mikrokontroler hang atau melewatkan interupsi penting lainnya.
+   ISR harus dibuat sesingkat mungkin karena proses utama program akan berhenti sementara saat ISR berjalan. Fungsi seperti `delay()` dan `Serial.print()` sebaiknya tidak digunakan karena bersifat lambat dan blocking, sehingga dapat menyebabkan mikrokontroler hang atau melewatkan interupsi penting lainnya.
 
 4. Apa fungsi keyword volatile pada variabel ledState?
 
    **Jawab:**
    Keyword volatile berfungsi agar compiler selalu membaca nilai variabel terbaru dari RAM karena nilainya dapat berubah sewaktu-waktu, misalnya oleh interupsi hardware. Hal ini mencegah compiler menggunakan nilai lama yang tersimpan di cache.
    
-5. Pada percobaan digunakan mode interrupt FALLING. Modifikasikan program menggunakan mode interrupt lain (RISING, CHANGE, atau LOW) kemudian:
+5. Pada percobaan digunakan mode interrupt `FALLING`. Modifikasikan program menggunakan mode interrupt lain (`RISING`, `CHANGE`, atau `LOW`) kemudian:
 
    kode modifikasi:
    ```cpp
@@ -86,118 +86,101 @@ interrupt!
 
 ---
 
-## B. Percobaan 5B: Komunikasi Task
+## Percobaan 6B: Timer Menggunakan millis()
 
-
-1. Apakah kedua task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
+1. Jelaskan bagaimana fungsi `millis()` bekerja pada program tersebut!
 
    **Jawab:**
-   Secara fisik pada tingkat perangkat keras, kedua task (read_data dan display) berjalan secara bergantian. Arduino Uno menggunakan mikrokontroler single
-   core, sehingga ia hanya dapat memproses satu instruksi pada satu waktu. Namun, pada tingkat perangkat lunak, keduanya terlihat berjalan secara bersamaan
-   (concurrent).
+   Fungsi `millis()` pada Arduino berfungsi sebagai penghitung waktu sejak board dinyalakan. Program membandingkan waktu saat ini (`currentMillis`) dengan waktu perubahan LED sebelumnya (`previousMillis`). Jika selisihnya mencapai 1000 ms, LED akan berubah status dan waktu sebelumnya diperbarui.
 
-   Mekanismenya:
-   Hal ini dimungkinkan oleh Kernel Scheduler dari FreeRTOS. Scheduler membagi waktu prosesor dengan sangat cepat (time-slicing) dan melakukan context
-   switching.
-   - Saat task read_data sedang mengemas data dan mengirimkannya ke Queue, task tersebut memegang kendali CPU.
-   - Setelah mengeksekusi vTaskDelay() atau ketika task display sedang menunggu data dengan xQueueReceive (menggunakan parameter portMAX_DELAY), task tersebut
-     masuk ke status Blocked (menunggu).
-   - Pada momen Blocked inilah, Scheduler langsung mengalihkan kendali CPU ke task lain yang statusnya sudah Ready, sehingga keduanya seolah-olah berjalan
-     paralel tanpa saling memblokir.
+2. Apa perbedaan utama antara `delay()` dan `millis()`?
 
-2. Apakah program ini berpotensi mengalami race condition? Jelaskan!
-
-   **Jawab:** Tidak, program ini tidak berpotensi mengalami race condition.
-   Race condition terjadi ketika beberapa task mengakses dan mengubah variabel yang sama secara bersamaan sehingga data menjadi tidak valid. Pada Percobaan 5B,
-   masalah ini dicegah dengan penggunaan Queue (xQueueSend dan xQueueReceive) yang bersifat thread-safe. Queue mengatur pertukaran data antara task secara aman
-   sehingga tidak ada akses langsung ke variabel yang sama pada waktu bersamaan.
+   **Jawab:**
+   `delay()` menghentikan seluruh proses program sementara waktu tertentu (blocking), sedangkan `millis()` memungkinkan program tetap berjalan sambil menghitung waktu (non-blocking). Karena itu, `millis() lebih cocok untuk menjalankan beberapa tugas secara bersamaan.
    
-3. Modifikasilah program dengan menggunakan sensor DHT sesungguhnya sehingga informasi yang ditampilkan dinamis. Bagaimana hasilnya? Jelaskan program pada file
-   README.md.
+3. Mengapa metode `millis()` disebut non-blocking?
 
    **Jawab:**
-   ```cpp
-   #include <Arduino_FreeRTOS.h>
-   #include <queue.h>
-   #include <DHT.h>
+   Metode non-blocking tidak menghentikan kerja CPU. Fungsi `millis()` hanya mengecek waktu tanpa membuat program menunggu, sehingga mikrokontroler tetap bisa menjalankan tugas lain secara bersamaan, seperti membaca sensor atau mengontrol LED.
 
-   // Konfigurasi pin dan tipe sensor DHT
-   #define DHTPIN 2
-   #define DHTTYPE DHT22
-
-   // Inisialisasi objek DHT
-   DHT dht(DHTPIN, DHTTYPE);
-
-   // Struktur data untuk menyimpan suhu dan kelembapan
-   // Menggunakan float karena DHT22 membaca nilai desimal
-   struct readings {
-     float temp;
-     float h;
-   };
-
-   QueueHandle_t my_queue;
-
-   void setup() {
-     Serial.begin(9600);
-     dht.begin();
-
-     // Membuat antrean (Queue) berkapasitas 1 elemen dengan ukuran struktur 'readings'
-     my_queue = xQueueCreate(1, sizeof(struct readings));
-
-     // Validasi: Cek apakah Queue berhasil dibuat sebelum menjalankan task
-     if (my_queue != NULL) {
-       xTaskCreate(read_data, "Read DHT", 128, NULL, 1, NULL);
-       xTaskCreate(display, "Display", 128, NULL, 1, NULL);
-     } else {
-       Serial.println("Gagal membuat Queue!");
-     }
-   }
-
-   void loop() {
-     // Dikosongkan karena eksekusi diambil alih oleh Scheduler FreeRTOS
-   }
-
-   // Task 1: Membaca Sensor (Produsen)
-   void read_data(void *pvParameters) {
-     struct readings x;
+4. Modifikasi program agar:
+   - LED pertama berkedip setiap 1 detik
+   - LED kedua berkedip setiap 500 ms
+   - Tanpa menggunakan `delay()`
+     
+  **Jawab:**
   
-     for (;;) {
-       // Membaca data kelembapan dan suhu dari sensor
-       x.h = dht.readHumidity();
-       x.temp = dht.readTemperature();
+  ```cpp
+  #include <Arduino.h>
 
-       // Validasi pembacaan sensor (mencegah pengiriman data error)
-       if (isnan(x.h) || isnan(x.temp)) {
-         Serial.println("Gagal membaca dari sensor DHT22!");
-       } else {
-         // Jika berhasil, kirim struktur data ke Queue
-         xQueueSend(my_queue, &x, portMAX_DELAY);
-       }
-    
-       // Spesifikasi hardware DHT22 mewajibkan jeda minimal 2000 ms antar-pembacaan
-       vTaskDelay(2000 / portTICK_PERIOD_MS);
-     }
-   }
+  // --- Variabel untuk LED 1 ---
+  const int ledPin1 = 13;             // Pin untuk LED pertama
+  unsigned long previousMillis1 = 0;  // Menyimpan waktu terakhir LED 1 berubah
+  const long interval1 = 1000;        // Interval kedip LED 1 (1000 ms / 1 detik)
+  bool ledState1 = false;             // Status saat ini dari LED 1
 
-   // Task 2: Menampilkan Data (Konsumen)
-   void display(void *pvParameters) {
-     struct readings x;
+  // --- Variabel untuk LED 2 ---
+  const int ledPin2 = 12;             // Pin untuk LED kedua
+  unsigned long previousMillis2 = 0;  // Menyimpan waktu terakhir LED 2 berubah
+  const long interval2 = 500;         // Interval kedip LED 2 (500 ms / 0.5 detik)
+  bool ledState2 = false;             // Status saat ini dari LED 2
+
+  void setup() {
+    pinMode(ledPin1, OUTPUT); // Mengatur Pin 13 sebagai OUTPUT
+    pinMode(ledPin2, OUTPUT); // Mengatur Pin 12 sebagai OUTPUT
+  }
+
+  void loop() {
+    // Mengambil waktu absolut saat ini sejak Arduino menyala
+    unsigned long currentMillis = millis();
+
+    // --- Logika Kontrol LED 1 ---
+    // Mengecek apakah selisih waktu sudah mencapai interval 1000 ms
+    if (currentMillis - previousMillis1 >= interval1) {
+      previousMillis1 = currentMillis; // Memperbarui patokan waktu terakhir LED 1
+      ledState1 = !ledState1;          // Membalik status LED 1 (jika ON jadi OFF, dst)
+      digitalWrite(ledPin1, ledState1);// Menuliskan status fisik ke Pin 13
+    }
+
+    // --- Logika Kontrol LED 2 ---
+    // Mengecek apakah selisih waktu sudah mencapai interval 500 ms
+    if (currentMillis - previousMillis2 >= interval2) {
+      previousMillis2 = currentMillis; // Memperbarui patokan waktu terakhir LED 2
+      ledState2 = !ledState2;          // Membalik status LED 2
+      digitalWrite(ledPin2, ledState2);// Menuliskan status fisik ke Pin 12
+    }
   
-     for (;;) {
-       // Menunggu hingga ada data yang masuk ke Queue, lalu mengambilnya
-       if (xQueueReceive(my_queue, &x, portMAX_DELAY) == pdPASS) {
-         Serial.print("Suhu = ");
-         Serial.print(x.temp);
-         Serial.print(" °C  |  Kelembapan = ");
-         Serial.print(x.h);
-         Serial.println(" %");
-       }
-     }
-   }
-   ```
-   | Waktu Eksekusi | Aksi Task `read_data` (Produsen) | Output Task `display` (Konsumen di Serial Monitor) | Status Antrean (Queue) |
-   | :--- | :--- | :--- | :--- |
-   | **0 detik** | Membaca sensor & mengirim data | `Suhu = 28.50 °C | Kelembapan = 65.20 %` | Kosong (Data langsung diambil) |
-   | **2 detik** | Membaca sensor & mengirim data | `Suhu = 28.50 °C | Kelembapan = 65.20 %` | Kosong (Data langsung diambil) |
-   | **4 detik** | Membaca sensor & mengirim data | `Suhu = 28.60 °C | Kelembapan = 65.30 %` | Kosong (Data langsung diambil) |
-   | **Simulasi Error**| Deteksi fungsi `isnan()` | `Gagal membaca dari sensor DHT22!` | Tetap Kosong |
+    // Karena tidak ada fungsi delay(), program akan kembali ke atas loop 
+    // dengan sangat cepat untuk mengecek kondisi if secara terus-menerus.
+  }
+  ```
+  Penjelasan kode:
+  - Variabel waktu dibuat terpisah agar kontrol LED 1 dan LED 2 independen.
+  - `unsigned long` digunakan untuk menyimpan waktu dari `millis()`.
+  - `setup()` mengatur pin 13 dan 12 sebagai output.
+  - `currentMillis` mengambil waktu real-time setiap loop berjalan.
+  - `if` pertama mengontrol LED 1 setiap 1000 ms.
+  - `if` kedua mengontrol LED 2 setiap 500 ms.
+  - Tanpa `delay()`, sistem dapat menjalankan dua proses secara bersamaan (non-blocking multitasking).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
