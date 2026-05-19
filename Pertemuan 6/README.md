@@ -29,6 +29,7 @@ interrupt!
    Keyword volatile berfungsi agar compiler selalu membaca nilai variabel terbaru dari RAM karena nilainya dapat berubah sewaktu-waktu, misalnya oleh interupsi hardware. Hal ini mencegah compiler menggunakan nilai lama yang tersimpan di cache.
    
 5. Pada percobaan digunakan mode interrupt FALLING. Modifikasikan program menggunakan mode interrupt lain (RISING, CHANGE, atau LOW) kemudian:
+
    kode modifikasi:
    ```cpp
    // Variabel volatile agar dapat diubah dalam ISR
@@ -64,10 +65,22 @@ interrupt!
    ```cpp
    attachInterrupt(digitalPinToInterrupt(2), tombolInterrupt, LOW);
    ```
-   - perbedaan cara kerja masing-masing mode interrupt tersebut
-     
-   - Analisis perubahan perilaku LED yang terjadi pada setiap mode
-
+   **Perbedaan cara kerja masing-masing mode interrupt tersebut**
+   - **FALLING:** Interupsi dipicu hanya ketika logika sinyal berubah turun dari `HIGH` ke `LOW`. (Terjadi persis pada saat tombol **mulai ditekan**).
+   - **RISING:** Interupsi dipicu hanya ketika logika sinyal berubah naik dari `LOW` ke `HIGH`. (Terjadi persis pada saat tombol **dilepaskan**).
+   - **CHANGE:** Interupsi dipicu setiap kali ada perubahan sinyal, baik itu dari `HIGH` ke `LOW` maupun sebaliknya. (Terjadi pada saat tombol **ditekan DAN dilepaskan**).
+   - **LOW:** Interupsi dipicu secara terus-menerus tanpa henti selama logika sinyal berada pada status `LOW`. (Terjadi **selama tombol ditahan**).
+   
+   **Analisis perubahan perilaku LED yang terjadi pada setiap mode**
+   - Mode `CHANGE`
+     **Source Code:** `attachInterrupt(digitalPinToInterrupt(2), tombolInterrupt, CHANGE);`
+     **Perilaku LED:** LED akan berubah status dua kali untuk setiap satu siklus penekanan tombol. Saat tombol ditekan ke bawah, LED berubah status (misal dari OFF ke ON). Saat jari diangkat dan tombol terlepas, LED akan langsung berubah status lagi (dari ON ke OFF).
+   - Mode `RISING`
+     **Source Code:** `attachInterrupt(digitalPinToInterrupt(2), tombolInterrupt, RISING);`
+     **Perilaku LED:** Berkebalikan dari `FALLING`. Saat tombol ditekan pertama kali, LED tidak merespons (tidak terjadi apa-apa). LED baru akan merespons (berubah status ON/OFF) tepat pada saat tekanan jari dilepaskan dari tombol.
+   - Mode `LOW`
+     **Source Code:** `attachInterrupt(digitalPinToInterrupt(2), tombolInterrupt, LOW);`
+     **Perilaku LED:** Perilaku ini sangat tidak stabil untuk *toggling* status LED. Saat tombol ditahan/ditekan lama, sinyal berada di posisi `LOW`. Akibatnya, mikrokontroler akan menembakkan ISR secara berulang-ulang dengan sangat cepat (ribuan kali per detik). Hasil fisiknya, LED akan terlihat menyala redup karena ia berkedip dengan frekuensi yang sangat tinggi, dan program utama `loop()` akan sepenuhnya terhenti karena CPU sibuk melayani ISR secara terus-menerus.
 
 
 
