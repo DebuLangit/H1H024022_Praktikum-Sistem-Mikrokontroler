@@ -5,144 +5,70 @@ https://github.com/user-attachments/assets/66e88dc7-947a-4f9c-a93c-eb9a4faaf1e2
 
 # <p align="center">Menjawab Pertanyaan Praktikum</p>
 
-## A. Percobaan 5A: Multitasking
+## Percobaan 6A: External Interrupt
 
-1. Apakah ketiga task berjalan secara bersamaan atau bergantian? Jelaskan mekanismenya!
+1. Jelaskan proses bagaimana tombol dapat mengubah kondisi LED menggunakan
+interrupt!
 
    **Jawab:**
-   Ketiga task secara fisik berjalan secara bergantian, bukan bersamaan secara absolut. Hal ini karena Arduino Uno menggunakan mikrokontroler dengan prosesor
-   inti tunggal (single-core), sehingga ia hanya bisa mengeksekusi satu instruksi pada satu waktu. Namun, ketiganya terlihat berjalan bersamaan secara kasat
-   mata (seolah-olah paralel).
-
-   RTOS menggunakan Kernel Scheduler untuk mengatur pembagian waktu CPU melalui mekanisme time-slicing. Saat sebuah task menjalankan `vTaskDelay()`, task
-   tersebut berhenti sementara dan memberi kesempatan CPU menjalankan task lain yang siap dieksekusi. Pergantian antar-task (context switching) terjadi sangat
-   cepat sehingga program terlihat berjalan secara bersamaan.
+   Tombol dapat mengubah kondisi LED menggunakan hardware interrupt. Pin 2 diatur sebagai INPUT_PULLUP, sehingga normalnya bernilai HIGH. Saat tombol ditekan, tegangan berubah dari HIGH ke LOW dan memicu mode FALLING. Mikrokontroler kemudian menghentikan sementara fungsi loop() untuk menjalankan ISR tombolInterrupt() yang mengubah nilai ledState. Setelah itu, program kembali ke loop() dan menjalankan digitalWrite(13, ledState) untuk mengubah kondisi LED.
    
-2. Bagaimana cara menambahkan task keempat? Jelaskan langkahnya!
+2. Apa fungsi attachInterrupt() pada program tersebut?
 
    **Jawab:**
-   - Deklarasi Prototipe Fungsi: Tambahkan nama fungsi baru di bagian atas kode program sebelum `setup().`
-     Contoh: `void TaskBlink3(void *pvParameters);`
-   - Registrasi Task ke Scheduler: Di dalam blok setup(), panggil perintah xTaskCreate() untuk mengalokasikan memori dan mendaftarkan task keempat tersebut
-     sebelum `vTaskStartScheduler()` dipanggil.
-     Contoh: `xTaskCreate(TaskBlink3, "Task4", 128, NULL, 1, NULL);`
-   - Definisi Logika Task: Buat blok fungsi di luar `setup()` dan `loop()` yang memuat logika program. Blok ini wajib memiliki perulangan tak terbatas seperti
-     `while(1)` atau `for(;;)` dan wajib memuat penundaan non-blocking menggunakan `vTaskDelay()` agar task tidak memonopoli (hogging) CPU.
-     Contoh:
-     ```cpp
-     void TaskBlink3(void *pvParameters) {
-        pinMode(6, OUTPUT);
-        while(1) {
-          digitalWrite(6, HIGH);
-          vTaskDelay(400 / portTICK_PERIOD_MS);
-          digitalWrite(6, LOW);
-          vTaskDelay(400 / portTICK_PERIOD_MS);
-        }
-      }
-     ```
-3. Modifikasilah program dengan menambah sensor (misalnya potensiometer), lalu gunakan nilainya untuk mengontrol kecepatan LED! Bagaimana hasilnya? Jelaskan
-   program pada file README.md.
+   Fungsi attachInterrupt() digunakan untuk menghubungkan interupsi pada Pin 2 dengan fungsi tombolInterrupt. Saat terjadi perubahan sinyal turun (FALLING), mikrokontroler langsung menjalankan fungsi ISR tersebut.
+  
+3. Mengapa pada ISR tidak disarankan menggunakan delay() dan Serial.print()?
 
    **Jawab:**
-   Program ini memodifikasi Percobaan 5A (Multitasking) dengan menambahkan komponen sensor analog berupa **Potensiometer**. Nilai resistansi dari potensiometer
-   dibaca oleh Arduino (melalui pin ADC) dan dikonversi menjadi rentang waktu. Waktu tersebut kemudian diumpankan ke dalam fungsi `vTaskDelay()` untuk
-   mengontrol seberapa cepat sebuah LED berkedip secara dinamis, tanpa menghentikan eksekusi task lainnya.
+   ISR harus dibuat sesingkat mungkin karena proses utama program akan berhenti sementara saat ISR berjalan. Fungsi seperti delay() dan Serial.print() sebaiknya tidak digunakan karena bersifat lambat dan blocking, sehingga dapat menyebabkan mikrokontroler hang atau melewatkan interupsi penting lainnya.
 
+4. Apa fungsi keyword volatile pada variabel ledState?
+
+   **Jawab:**
+   Keyword volatile berfungsi agar compiler selalu membaca nilai variabel terbaru dari RAM karena nilainya dapat berubah sewaktu-waktu, misalnya oleh interupsi hardware. Hal ini mencegah compiler menggunakan nilai lama yang tersimpan di cache.
+   
+5. Pada percobaan digunakan mode interrupt FALLING. Modifikasikan program menggunakan mode interrupt lain (RISING, CHANGE, atau LOW) kemudian:
+   kode modifikasi:
    ```cpp
-   #include <Arduino_FreeRTOS.h>
+   // Variabel volatile agar dapat diubah dalam ISR
+   volatile bool ledState = false;
 
-   void TaskBlink1( void *pvParameters );
-   void TaskBlink2( void *pvParameters );
-   void Taskprint( void *pvParameters );
+   // ISR: dijalankan saat kondisi sinyal berubah (ditekan maupun dilepas)
+   void tombolInterrupt() {
+     ledState = !ledState; // Toggle status LED
+   }
 
    void setup() {
-     // initialize serial communication at 9600 bits per second:
-     Serial.begin(9600);
-  
-     xTaskCreate(
-       TaskBlink1
-       , "task1"
-       , 128
-       , NULL
-       , 1
-       , NULL );
+     // Konfigurasi pin 13 sebagai output (LED)
+     pinMode(13, OUTPUT);
+     // Konfigurasi pin 2 sebagai input dengan pull-up internal
+     pinMode(2, INPUT_PULLUP);
     
-     xTaskCreate(
-       TaskBlink2
-       , "task2"
-       , 128
-       , NULL
-       , 1 
-       , NULL );
-    
-     xTaskCreate(
-       Taskprint
-       , "task3"
-       , 128
-       , NULL
-       , 1
-       , NULL );
-    
-     vTaskStartScheduler();
+     // Daftarkan ISR pada pin 2, dipicu CHANGE (perubahan sinyal)
+     attachInterrupt(digitalPinToInterrupt(2), tombolInterrupt, CHANGE);
    }
 
-   void loop()
-   {
-   }
-
-   void TaskBlink1(void *pvParameters) {
-     pinMode(8, OUTPUT);
-     while(1)
-     {
-       Serial.println("Task1");
-    
-       // 1. Membaca nilai dari Potensiometer di pin A0 (0 - 1023)
-       int potValue = analogRead(A0);
-    
-       // 2. Memetakan nilai ADC menjadi delay waktu (misal: rentang 50 ms hingga 1000 ms)
-       int dynamicDelay = map(potValue, 0, 1023, 50, 1000);
-    
-       digitalWrite(8, HIGH);
-       // 3. Mengganti nilai statis 200 dengan dynamicDelay
-       vTaskDelay( dynamicDelay / portTICK_PERIOD_MS ); 
-    
-       digitalWrite(8, LOW);
-       vTaskDelay( dynamicDelay / portTICK_PERIOD_MS );
-     }
-   }
-
-   void TaskBlink2(void *pvParameters)
-   {
-     pinMode(7, OUTPUT);
-     while(1)
-     {
-       Serial.println("Task2");
-       digitalWrite(7, HIGH);
-       vTaskDelay( 300 / portTICK_PERIOD_MS );
-       digitalWrite(7, LOW);
-       vTaskDelay( 300 / portTICK_PERIOD_MS );
-     }
-   }
-
-   void Taskprint(void *pvParameters) {
-     int counter = 0;
-     while(1)
-     {
-       counter++;
-       Serial.print("Counter: "); // Ditambahkan teks agar lebih rapi di Serial Monitor
-       Serial.println(counter);
-       vTaskDelay(500 / portTICK_PERIOD_MS); 
-     }
+   void loop() {
+     // Tulis status LED sesuai variabel ledState
+     digitalWrite(13, ledState);
    }
    ```
-   **Analisis Hasil Modifikasi:**
-   Hasil modifikasi menunjukkan bahwa fungsi map berhasil mengubah nilai ADC potensiometer menjadi dynamicDelay 50–1000 ms secara real-time. Perubahan tersebut
-   memengaruhi kecepatan kedip LED 1 sesuai posisi potensiometer.
+   untuk kode program sama, hanya ganti mode di baris:
+   ```cpp
+   attachInterrupt(digitalPinToInterrupt(2), tombolInterrupt, CHANGE);
+   ```
+   ```cpp
+   attachInterrupt(digitalPinToInterrupt(2), tombolInterrupt, RISING);
+   ```
+   ```cpp
+   attachInterrupt(digitalPinToInterrupt(2), tombolInterrupt, LOW);
+   ```
+   - perbedaan cara kerja masing-masing mode interrupt tersebut
+     
+   - Analisis perubahan perilaku LED yang terjadi pada setiap mode
 
-   Setiap task pada RTOS berjalan secara independen sehingga perubahan pada LED 1 tidak memengaruhi LED 2 maupun pengiriman data Serial Monitor. Penggunaan
-   vTaskDelay() memungkinkan sistem bekerja secara non-blocking, karena saat satu task menunggu, CPU dapat menjalankan task lain.
 
-   Dengan demikian, RTOS berhasil menangani proses dinamis secara efisien dibandingkan metode delay() biasa pada Arduino.
 
 
 ---
